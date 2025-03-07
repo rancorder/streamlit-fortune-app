@@ -63,7 +63,7 @@ def generate_fortune(birth_date, gender):
     - **健康運:** ○○な心身の状態を意識すると良いでしょう。
     - **ラッキーカラー:** ○○
     - **ラッキーアイテム:** ○○
-    - **【今日のまとめ】**（100字程度で簡潔にアドバイス）
+    - **【今日のまとめ】**（200字程度でアドバイス）
     """
 
     try:
@@ -105,9 +105,5 @@ if st.button("今日の運勢を占う"):
         tweet_text = f"🔮 今日の運勢 🔮\n{fortune_summary[:100]}...\n\nあなたも占ってみよう！"
         tweet_url = f"https://twitter.com/intent/tweet?text={tweet_text}&url=https://your-app-url.streamlit.app"
         st.markdown(f'[🐦 Twitter でシェア]({tweet_url})', unsafe_allow_html=True)
-
-        # **LINE シェアボタン**
-        line_url = f"https://social-plugins.line.me/lineit/share?url=https://your-app-url.streamlit.app"
-        st.markdown(f'[💬 LINE でシェア]({line_url})', unsafe_allow_html=True)
     else:
         st.error("⚠ 8桁の数字で入力してください (例: 19900515)")
