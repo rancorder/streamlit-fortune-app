@@ -1,9 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
-import os
 from datetime import datetime
-from PIL import Image, ImageDraw, ImageFont
-import io
 import base64
 import re
 
@@ -39,25 +36,6 @@ def calculate_tensei_type(birth_year, birth_month, birth_day):
     base = (birth_year + birth_month + birth_day) % 12
     types = ["満月", "上弦の月", "新月", "下弦の月", "太陽", "夕焼け", "朝焼け", "月食", "日食", "流星", "銀河", "彗星"]
     return types[base]
-
-# 🔹 画像生成関数（占い結果を画像化）
-def generate_image(text):
-    img = Image.new('RGB', (600, 400), color=(255, 255, 255))
-    draw = ImageDraw.Draw(img)
-    
-    try:
-        font = ImageFont.truetype("arial.ttf", 24)
-    except:
-        font = ImageFont.load_default()
-    
-    draw.text((20, 50), text, fill=(0, 0, 0), font=font)
-
-    # 画像をバイナリ形式に変換
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
-    
-    return buf
 
 # 🔹 SNS 共有用の画像URLを作成
 def get_image_download_link(img_buf):
@@ -108,8 +86,6 @@ st.title("🔮 本格占いアプリ 🔮")
 
 import re
 
-import re
-
 # 🎯 ユーザー入力フォーム（デフォルトは空にする）
 birth_date = st.text_input("生年月日を YYYYMMDD の形式で入力してください", value="", placeholder="例: 19900515")
 gender_option = st.radio("性別を選択してください", ("男性", "女性"))
@@ -121,13 +97,13 @@ if st.button("今日の運勢を占う"):
 
         # **念のため最終チェックとして不要な記号を削除**
         fortune_cleaned = re.sub(r"[■●◇◆○◎▶☀️★☆━─□]", "", fortune)
+        
+        # 不要な記号をさらに削除するためのチェック
+        additional_unwanted_chars = r'[^\w\s,.!?-]'
+        fortune_cleaned = re.sub(additional_unwanted_chars, '', fortune_cleaned)
 
         st.subheader("✨ 今日の運勢 ✨")
         st.write(fortune_cleaned)
-
-        # **画像生成**
-        img_buf = generate_image(fortune_cleaned)
-        st.image(img_buf, caption="📷 あなたの占い結果", use_container_width=True)
 
         # **ダウンロードリンク**
         st.markdown(get_image_download_link(img_buf), unsafe_allow_html=True)
