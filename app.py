@@ -5,6 +5,7 @@ from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import io
 import base64
+import re
 
 # 🔹 今日の日付を取得（YYYYMMDD 形式）
 today_date = datetime.today().strftime('%Y%m%d')
@@ -102,6 +103,8 @@ def generate_fortune(birth_date, gender):
 # 🎨 **Streamlit Web アプリ**
 st.title("🔮 本格占いアプリ 🔮")
 
+import re
+
 # 🎯 ユーザー入力フォーム（デフォルトは空にする）
 birth_date = st.text_input("生年月日を YYYYMMDD の形式で入力してください", value="", placeholder="例: 19900515")
 gender_option = st.radio("性別を選択してください", ("男性", "女性"))
@@ -111,11 +114,14 @@ if st.button("今日の運勢を占う"):
     if birth_date.isdigit() and len(birth_date) == 8:
         fortune = generate_fortune(birth_date, gender_option)
 
-        # **不要な記号を削除**
-        fortune_cleaned = fortune.strip().replace("*", "").replace("■", "").replace("●", "")
+        # **正規表現を使って不要な記号を完全削除**
+        fortune_cleaned = re.sub(r"[*■●◇◆○◎▶☀️★☆━─]", "", fortune)
+
+        # **リスト記号 `-` や `•` を統一**
+        fortune_cleaned = re.sub(r"\n[\-\•]", "\n- ", fortune_cleaned)
 
         # **改行を適切に処理し、余計な空白行を削除**
-        formatted_fortune = "\n\n".join([line for line in fortune_cleaned.split("\n") if line.strip()])
+        formatted_fortune = "\n\n".join([line.strip() for line in fortune_cleaned.split("\n") if line.strip()])
 
         st.subheader("✨ 今日の運勢 ✨")
         st.write(formatted_fortune)
