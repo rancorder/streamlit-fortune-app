@@ -1,14 +1,22 @@
 import streamlit as st
 import google.generativeai as genai
+import toml
 
-# 🔹 APIキーを設定（実際のキーに変更する）
-API_KEY = "YOUR_GEMINI_API_KEY"
-genai.configure(api_key=API_KEY)
+# 🔹 secrets.toml から APIキー を読み込む
+with open("secrets.toml", "r") as f:
+    secrets = toml.load(f)
+API_KEY = secrets.get("GEMINI_API_KEY", "")
+
+# APIキーの設定
+if not API_KEY:
+    st.error("⚠ APIキーが設定されていません。secrets.toml を確認してください。")
+else:
+    genai.configure(api_key=API_KEY)
 
 # 最新のモデルを指定
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
 
-# 🔹 占いロジック（仮）
+# 🔹 占いロジック
 def generate_fortune(birth_date, gender):
     prompt = f"""
     あなたはプロの占い師です。
