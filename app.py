@@ -1,11 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
-from datetime import datetime
-import base64
 import re
-
-# 🔹 今日の日付を取得（YYYYMMDD 形式）
-today_date = datetime.today().strftime('%Y%m%d')
+from datetime import datetime
 
 # 🔹 Streamlit Cloud の Secrets から APIキー を取得
 API_KEY = st.secrets["GEMINI_API_KEY"]
@@ -37,12 +33,7 @@ def calculate_tensei_type(birth_year, birth_month, birth_day):
     types = ["満月", "上弦の月", "新月", "下弦の月", "太陽", "夕焼け", "朝焼け", "月食", "日食", "流星", "銀河", "彗星"]
     return types[base]
 
-# 🔹 SNS 共有用の画像URLを作成
-def get_image_download_link(img_buf):
-    img_base64 = base64.b64encode(img_buf.getvalue()).decode()
-    return f'<a href="data:image/png;base64,{img_base64}" download="fortune.png">📥 画像をダウンロード</a>'
-
-# 🔹 占いロジック
+# 🔹 占いロジック（Gemini API の出力フォーマットを厳格に指定）
 def generate_fortune(birth_date, gender):
     birth_year = int(birth_date[:4])
     birth_month = int(birth_date[4:6])
@@ -75,7 +66,7 @@ def generate_fortune(birth_date, gender):
     """
 
     try:
-        model = genai.GenerativeModel("gemini-1.5-pro")
+        model = genai.GenerativeModel(MODEL_NAME)
         response = model.generate_content(prompt)
         return response.text.strip()
     except Exception as e:
@@ -83,8 +74,6 @@ def generate_fortune(birth_date, gender):
 
 # 🎨 **Streamlit Web アプリ**
 st.title("🔮 本格占いアプリ 🔮")
-
-import re
 
 # 🎯 ユーザー入力フォーム（デフォルトは空にする）
 birth_date = st.text_input("生年月日を YYYYMMDD の形式で入力してください", value="", placeholder="例: 19900515")
@@ -97,16 +86,9 @@ if st.button("今日の運勢を占う"):
 
         # **念のため最終チェックとして不要な記号を削除**
         fortune_cleaned = re.sub(r"[■●◇◆○◎▶☀️★☆━─□]", "", fortune)
-        
-        # 不要な記号をさらに削除するためのチェック
-        additional_unwanted_chars = r'[^\w\s,.!?-]'
-        fortune_cleaned = re.sub(additional_unwanted_chars, '', fortune_cleaned)
 
         st.subheader("✨ 今日の運勢 ✨")
         st.write(fortune_cleaned)
-
-        # **ダウンロードリンク**
-        st.markdown(get_image_download_link(img_buf), unsafe_allow_html=True)
 
         # 🔹 Twitter シェアボタン
         tweet_text = f"🔮 今日の運勢 🔮\n{fortune_cleaned[:100]}...\n\nあなたも占ってみよう！"
