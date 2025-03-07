@@ -3,6 +3,9 @@ import google.generativeai as genai
 import os
 from datetime import datetime
 
+# 🔹 今日の日付を取得（YYYYMMDD 形式）
+today_date = datetime.today().strftime('%Y%m%d')
+
 # 🔹 Streamlit Cloud の Secrets から APIキー を取得
 API_KEY = st.secrets["GEMINI_API_KEY"]
 
@@ -72,8 +75,8 @@ def generate_fortune(birth_date, gender):
 # 🎨 **Streamlit Web アプリ**
 st.title("🔮 本格占いアプリ 🔮")
 
-# 🎯 ユーザー入力フォーム
-birth_date = st.text_input("生年月日を YYYYMMDD の形式で入力してください", "")
+# 🎯 ユーザー入力フォーム（デフォルト値を今日の日付に設定）
+birth_date = st.text_input("生年月日を YYYYMMDD の形式で入力してください", today_date)
 gender_option = st.radio("性別を選択してください", ("男性", "女性"))
 
 # 🔘 占いボタン
