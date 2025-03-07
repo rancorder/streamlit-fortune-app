@@ -95,7 +95,7 @@ def generate_fortune(birth_date, gender):
     try:
         model = genai.GenerativeModel(MODEL_NAME)
         response = model.generate_content(prompt)
-        return response.text
+        return response.text.replace("\n", "\n\n")  # ✅ 改行を適切に処理
     except Exception as e:
         return f"⚠ エラーが発生しました: {str(e)}"
 
@@ -113,11 +113,11 @@ if st.button("今日の運勢を占う"):
         st.subheader("✨ 今日の運勢 ✨")
         st.write(fortune)
 
-        # 画像生成
+        # **画像生成**
         img_buf = generate_image(fortune)
-        st.image(img_buf, caption="📷 あなたの占い結果", use_column_width=True)
+        st.image(img_buf, caption="📷 あなたの占い結果", use_container_width=True)  # ✅ 修正
 
-        # ダウンロードリンク
+        # **ダウンロードリンク**
         st.markdown(get_image_download_link(img_buf), unsafe_allow_html=True)
 
         # 🔹 Twitter シェアボタン
