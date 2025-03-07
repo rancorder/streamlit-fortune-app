@@ -1,23 +1,18 @@
 import streamlit as st
 import google.generativeai as genai
-import toml
+import os
 
-# 🔹 secrets.toml から APIキー を読み込む
-try:
-    with open("secrets.toml", "r") as f:
-        secrets = toml.load(f)
-    API_KEY = secrets.get("GEMINI_API_KEY", "")
-except Exception as e:
-    API_KEY = ""
+# 🔹 Streamlit Cloud の Secrets から APIキー を取得
+API_KEY = st.secrets["GEMINI_API_KEY"]
 
 # APIキーの設定
 if not API_KEY:
-    st.error("⚠ APIキーが設定されていません。secrets.toml を確認してください。")
+    st.error("⚠ APIキーが設定されていません。Streamlit Cloud の Secrets を確認してください。")
 else:
     genai.configure(api_key=API_KEY)
 
-# 🔹 Gemini API モデルの選択（モデル名を修正）
-MODEL_NAME = "gemini-1.5-pro"
+# 🔹 Gemini API モデルの選択（モデル名を変更して試す）
+MODEL_NAME = "gemini-1.5-pro"  # もしくは "gemini-pro"
 
 # 🔹 占いロジック（四柱推命・六星占術・天星術を統合）
 def generate_fortune(birth_date, gender):
