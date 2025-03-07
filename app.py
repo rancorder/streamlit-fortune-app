@@ -74,7 +74,7 @@ def generate_fortune(birth_date, gender):
         return f"⚠ エラーが発生しました: {str(e)}"
 
 # 🎨 **Streamlit Web アプリ**
-st.title("🔮 本格占いアプリ 🔮")
+st.title("🔮 今日の運勢メーカー 🔮")
 
 birth_date = st.text_input("生年月日を YYYYMMDD の形式で入力してください", value="", placeholder="例: 19900515")
 gender_option = st.radio("性別を選択してください", ("男性", "女性"))
