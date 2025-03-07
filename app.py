@@ -119,27 +119,21 @@ if st.button("今日の運勢を占う"):
     if birth_date.isdigit() and len(birth_date) == 8:
         fortune = generate_fortune(birth_date, gender_option)
 
-        # **正規表現を使って不要な装飾記号を完全削除**
+        # **念のため最終チェックとして不要な記号を削除**
         fortune_cleaned = re.sub(r"[■●◇◆○◎▶☀️★☆━─□]", "", fortune)
 
-        # **リスト記号を `-` に統一（「•」「▶」「→」などを変換）**
-        fortune_cleaned = re.sub(r"\n[\-\•▶→]", "\n- ", fortune_cleaned)
-
-        # **余計な空白行を削除**
-        formatted_fortune = "\n\n".join([line.strip() for line in fortune_cleaned.split("\n") if line.strip()])
-
         st.subheader("✨ 今日の運勢 ✨")
-        st.write(formatted_fortune)
+        st.write(fortune_cleaned)
 
         # **画像生成**
-        img_buf = generate_image(formatted_fortune)
+        img_buf = generate_image(fortune_cleaned)
         st.image(img_buf, caption="📷 あなたの占い結果", use_container_width=True)
 
         # **ダウンロードリンク**
         st.markdown(get_image_download_link(img_buf), unsafe_allow_html=True)
 
         # 🔹 Twitter シェアボタン
-        tweet_text = f"🔮 今日の運勢 🔮\n{fortune[:100]}...\n\nあなたも占ってみよう！"
+        tweet_text = f"🔮 今日の運勢 🔮\n{fortune_cleaned[:100]}...\n\nあなたも占ってみよう！"
         tweet_url = f"https://twitter.com/intent/tweet?text={tweet_text}&url=https://your-app-url.streamlit.app"
         st.markdown(f'[🐦 Twitter でシェア]({tweet_url})', unsafe_allow_html=True)
 
