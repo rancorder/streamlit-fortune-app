@@ -109,12 +109,15 @@ gender_option = st.radio("性別を選択してください", ("男性", "女性
 # 🔘 占いボタン
 if st.button("今日の運勢を占う"):
     if birth_date.isdigit() and len(birth_date) == 8:
-        fortune = generate_fortune(birth_date, gender_option)
+        fortune = generate_fortune(birth_date, gender_option).strip()  # ✅ 不要な記号や空白を削除
         st.subheader("✨ 今日の運勢 ✨")
-        st.write(fortune)
+
+        # **改行を適切に処理し、読みやすくする**
+        formatted_fortune = fortune.replace("\n", "\n\n")
+        st.write(formatted_fortune)
 
         # **画像生成**
-        img_buf = generate_image(fortune)
+        img_buf = generate_image(formatted_fortune)
         st.image(img_buf, caption="📷 あなたの占い結果", use_container_width=True)  # ✅ 修正
 
         # **ダウンロードリンク**
