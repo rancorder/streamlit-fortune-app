@@ -2,6 +2,9 @@ import streamlit as st
 import google.generativeai as genai
 import os
 from datetime import datetime
+from PIL import Image, ImageDraw, ImageFont
+import io
+import base64
 
 # 🔹 今日の日付を取得（YYYYMMDD 形式）
 today_date = datetime.today().strftime('%Y%m%d')
@@ -18,42 +21,36 @@ else:
 # 🔹 Gemini API モデルの選択
 MODEL_NAME = "gemini-1.5-pro"
 
-# 🔹 四柱推命の干支・五行を計算
-def calculate_chinese_zodiac(birth_year):
-    zodiacs = ["申", "酉", "戌", "亥", "子", "丑", "寅", "卯", "辰", "巳", "午", "未"]
-    elements = ["金", "金", "土", "土", "水", "水", "木", "木", "火", "火", "土", "土"]
-    index = birth_year % 12
-    return f"{zodiacs[index]} ({elements[index]}の気質)"
+# 🔹 画像生成関数（占い結果を画像化）
+def generate_image(text):
+    img = Image.new('RGB', (600, 400), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    
+    try:
+        font = ImageFont.truetype("arial.ttf", 24)
+    except:
+        font = ImageFont.load_default()
+    
+    draw.text((20, 50), text, fill=(0, 0, 0), font=font)
 
-# 🔹 六星占術の運命星を計算
-def calculate_six_star(birth_year):
-    stars = ["金星", "火星", "土星", "天王星", "木星", "水星"]
-    return stars[(birth_year - 1900) % 6]
+    # 画像をバイナリ形式に変換
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    
+    return buf
 
-# 🔹 天星術の天星タイプを計算
-def calculate_tensei_type(birth_year, birth_month, birth_day):
-    base = (birth_year + birth_month + birth_day) % 12
-    types = ["満月", "上弦の月", "新月", "下弦の月", "太陽", "夕焼け", "朝焼け", "月食", "日食", "流星", "銀河", "彗星"]
-    return types[base]
+# 🔹 SNS 共有用の画像URLを作成
+def get_image_download_link(img_buf):
+    img_base64 = base64.b64encode(img_buf.getvalue()).decode()
+    return f'<a href="data:image/png;base64,{img_base64}" download="fortune.png">📥 画像をダウンロード</a>'
 
-# 🔹 占いロジック（詳細データを Gemini API に送信）
+# 🔹 占いロジック
 def generate_fortune(birth_date, gender):
-    birth_year = int(birth_date[:4])
-    birth_month = int(birth_date[4:6])
-    birth_day = int(birth_date[6:8])
-
-    chinese_zodiac = calculate_chinese_zodiac(birth_year)
-    six_star = calculate_six_star(birth_year)
-    tensei_type = calculate_tensei_type(birth_year, birth_month, birth_day)
-
     prompt = f"""
-    あなたはプロの占い師です。以下のデータを基に {birth_date} 生まれの {gender} の運勢を詳細に占ってください。
+    あなたはプロの占い師です。以下の情報を元に {birth_date} 生まれの {gender} の運勢を詳細に占ってください。
 
-    🔹 四柱推命（干支・五行）: {chinese_zodiac}
-    🔹 六星占術（運命星）: {six_star}
-    🔹 天星術（天星タイプ）: {tensei_type}
-
-    **占い結果のフォーマット**
+    **鑑定結果のフォーマット**
     - **総合運:** ○○な運勢です。
     - **仕事運:** ○○な傾向があります。
     - **恋愛運:** ○○な特徴があります。
@@ -85,5 +82,21 @@ if st.button("今日の運勢を占う"):
         fortune = generate_fortune(birth_date, gender_option)
         st.subheader("✨ 今日の運勢 ✨")
         st.write(fortune)
+
+        # 画像生成
+        img_buf = generate_image(fortune)
+        st.image(img_buf, caption="📷 あなたの占い結果", use_column_width=True)
+
+        # ダウンロードリンク
+        st.markdown(get_image_download_link(img_buf), unsafe_allow_html=True)
+
+        # Twitter シェアボタン
+        tweet_text = f"🔮 今日の運勢 🔮\n{fortune[:100]}...\n\nあなたも占ってみよう！"
+        tweet_url = f"https://twitter.com/intent/tweet?text={tweet_text}&url=https://your-app-url.streamlit.app"
+        st.markdown(f'[🐦 Twitter でシェア]({tweet_url})', unsafe_allow_html=True)
+
+        # LINE シェアボタン
+        line_url = f"https://social-plugins.line.me/lineit/share?url=https://your-app-url.streamlit.app"
+        st.markdown(f'[💬 LINE でシェア]({line_url})', unsafe_allow_html=True)
     else:
         st.error("⚠ 8桁の数字で入力してください (例: 19900515)")
