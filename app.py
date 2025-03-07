@@ -63,7 +63,7 @@ def generate_fortune(birth_date, gender):
     - **健康運:** ○○な心身の状態を意識すると良いでしょう。
     - **ラッキーカラー:** ○○
     - **ラッキーアイテム:** ○○
-    - **【今日のまとめ】**（200字程度でアドバイス）
+    - **【今日のアドバイス】**（200字程度で詳細なアドバイスを提供）
     """
 
     try:
@@ -83,9 +83,9 @@ if st.button("今日の運勢を占う"):
     if birth_date.isdigit() and len(birth_date) == 8:
         fortune = generate_fortune(birth_date, gender_option)
 
-        # **「今日のまとめ」を分離**
-        if "【今日のまとめ】" in fortune:
-            parts = fortune.split("【今日のまとめ】")
+        # **「今日のアドバイス」を分離**
+        if "【今日のアドバイス】" in fortune:
+            parts = fortune.split("【今日のアドバイス】")
             fortune_main = parts[0].strip()
             fortune_summary = parts[1].strip() if len(parts) > 1 else ""
         else:
@@ -101,9 +101,5 @@ if st.button("今日の運勢を占う"):
         if fortune_summary:
             st.markdown(f"📌 **今日のアドバイス:** {fortune_summary}")
 
-        # **Twitter シェアボタン**
-        tweet_text = f"🔮 今日の運勢 🔮\n{fortune_summary[:100]}...\n\nあなたも占ってみよう！"
-        tweet_url = f"https://twitter.com/intent/tweet?text={tweet_text}&url=https://your-app-url.streamlit.app"
-        st.markdown(f'[🐦 Twitter でシェア]({tweet_url})', unsafe_allow_html=True)
     else:
         st.error("⚠ 8桁の数字で入力してください (例: 19900515)")
